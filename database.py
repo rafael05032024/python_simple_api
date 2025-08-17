@@ -1,12 +1,15 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+import mysql.connector
 
-DATABASE_URL = "sqlite:///./banco.db"
+DB_HOST = "localhost"  # se estiver rodando fora do container
+DB_USER = "rafael"
+DB_PASS = "aptdw"
+DB_NAME = "meubanco"
 
-engine = create_engine(
-    DATABASE_URL, connect_args={"check_same_thread": False}
-)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-Base = declarative_base()
+def get_connection():
+    return mysql.connector.connect(
+        host=DB_HOST,
+        user=DB_USER,
+        password=DB_PASS,
+        database=DB_NAME
+        )

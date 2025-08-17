@@ -1,55 +1,33 @@
-from fastapi import FastAPI, Depends, HTTPException
-from sqlalchemy.orm import Session
-import models, schemas
-from database import SessionLocal, engine
+from fastapi import FastAPI
 
-models.Base.metadata.create_all(bind=engine)
+from models.pessoa_model import Pessoa
+from dto.pessoa_create_dto import PessoaCreate
+from repositories.pessoa_repository import PessoaRepository
+from ssh import exec_ssh_command
+
 
 app = FastAPI()
 
-# Dependência para criar sessão do banco
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+repo = PessoaRepository()
 
-@app.post("/usuarios/", response_model=schemas.UsuarioOut)
-def criar_usuario(usuario: schemas.UsuarioCreate, db: Session = Depends(get_db)):
-    db_usuario = models.Usuario(nome=usuario.nome, email=usuario.email)
-    db.add(db_usuario)
-    db.commit()
-    db.refresh(db_usuario)
-    return db_usuario
 
-@app.get("/usuarios/", response_model=list[schemas.UsuarioOut])
-def listar_usuarios(db: Session = Depends(get_db)):
-    return db.query(models.Usuario).all()
+@app.get("/pessoas/")
+def list_pessoas():
+    return repo.get_all()
 
-@app.get("/usuarios/{usuario_id}", response_model=schemas.UsuarioOut)
-def obter_usuario(usuario_id: int, db: Session = Depends(get_db)):
-    usuario = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
-    if not usuario:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    return usuario
 
-@app.put("/usuarios/{usuario_id}", response_model=schemas.UsuarioOut)
-def atualizar_usuario(usuario_id: int, usuario: schemas.UsuarioCreate, db: Session = Depends(get_db)):
-    db_usuario = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
-    if not db_usuario:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    db_usuario.nome = usuario.nome
-    db_usuario.email = usuario.email
-    db.commit()
-    db.refresh(db_usuario)
-    return db_usuario
+@app.post("/pessoa/")
+def create_pessoa(pessoa: PessoaCreate):
+    nova_pessoa = Pessoa(id=None, nome=pessoa.nome, idade=pessoa.idade)
 
-@app.delete("/usuarios/{usuario_id}")
-def deletar_usuario(usuario_id: int, db: Session = Depends(get_db)):
-    usuario = db.query(models.Usuario).filter(models.Usuario.id == usuario_id).first()
-    if not usuario:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
-    db.delete(usuario)
-    db.commit()
-    return {"mensagem": "Usuário deletado"}
+    print(type(nova_pessoa.nome), nova_pessoa.nome)
+    print(type(nova_pessoa.idade), nova_pessoa.idade)
+
+    return repo.add(nova_pessoa)
+
+
+@app.post("/exec_ssh")
+def exec_ssh():
+    exec_ssh_command()
+
+    return {"mensagem": "Comando executado"}
