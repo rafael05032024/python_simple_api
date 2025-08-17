@@ -17,7 +17,7 @@ COPY . .
 # Variáveis de ambiente (pode sobrescrever no docker run)
 ENV DB_USER=rafael
 ENV DB_PASS=aptdw
-ENV DB_NAME=meubanco
+ENV DB_NAME=mydb
 
 EXPOSE 3306 8000
 
