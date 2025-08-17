@@ -1,11 +1,21 @@
-aprendizados:
+FastAPI + MariaDB Kubernetes Setup
 
--> instalar extenções: Black Formatter, Flake8
--> executar testes unitários: pytest -v
--> para executar: docker-compose up
+Este projeto demonstra como configurar uma aplicação FastAPI com MariaDB usando Kubernetes e Docker. Inclui exemplos de PVC e Deployment, além de dicas de desenvolvimento e testes.
 
-#PVC
-'''
+Aprendizados:
+
+- Instalar extensões para Python:
+  - Black Formatter (formatação automática)
+  - Flake8 (linting)
+- Executar testes unitários:
+  pytest -v
+- Executar a aplicação localmente:
+  docker-compose up
+
+Persistent Volume Claim (PVC):
+
+Arquivo pvc.yaml para criar o volume persistente do MariaDB:
+
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -17,10 +27,10 @@ spec:
     requests:
       storage: 5Gi
 
-'''
+Deployment do Container:
 
-#CONTAINER
-'''
+Arquivo deployment.yaml para criar o deployment do FastAPI + MariaDB:
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -37,7 +47,7 @@ spec:
     spec:
       containers:
         - name: fastapi-app
-          image: sua-imagem:latest  # sua imagem que já tem MariaDB
+          image: sua-imagem:latest  # sua imagem que já contém MariaDB
           ports:
             - containerPort: 8000
             - containerPort: 3306
@@ -50,10 +60,27 @@ spec:
               value: mydb
           volumeMounts:
             - name: mariadb-storage
-              mountPath: /var/lib/mysql   # <--- o caminho do MariaDB no container
+              mountPath: /var/lib/mysql
       volumes:
         - name: mariadb-storage
           persistentVolumeClaim:
             claimName: app-mariadb-pvc
 
-'''
+Como usar:
+
+1. Construir a imagem Docker:
+   docker build -t sua-imagem:latest .
+2. Subir o PVC no Kubernetes:
+   kubectl apply -f pvc.yaml
+3. Criar o Deployment:
+   kubectl apply -f deployment.yaml
+4. Verificar os pods e status:
+   kubectl get pods
+5. Conectar no MariaDB usando DBeaver ou outro cliente, utilizando a porta exposta.
+
+Links Úteis:
+
+- FastAPI Documentation: https://fastapi.tiangolo.com/
+- MariaDB Documentation: https://mariadb.com/kb/en/
+- Kubernetes Documentation: https://kubernetes.io/docs/
+- Docker Documentation: https://docs.docker.com/
