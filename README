@@ -1,0 +1,59 @@
+aprendizados:
+
+-> instalar extenções: Black Formatter, Flake8
+-> executar testes unitários: pytest -v
+-> para executar: docker-compose up
+
+#PVC
+'''
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: app-mariadb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+'''
+
+#CONTAINER
+'''
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fastapi-app
+  template:
+    metadata:
+      labels:
+        app: fastapi-app
+    spec:
+      containers:
+        - name: fastapi-app
+          image: sua-imagem:latest  # sua imagem que já tem MariaDB
+          ports:
+            - containerPort: 8000
+            - containerPort: 3306
+          env:
+            - name: DB_USER
+              value: rafael
+            - name: DB_PASS
+              value: aptdw
+            - name: DB_NAME
+              value: mydb
+          volumeMounts:
+            - name: mariadb-storage
+              mountPath: /var/lib/mysql   # <--- o caminho do MariaDB no container
+      volumes:
+        - name: mariadb-storage
+          persistentVolumeClaim:
+            claimName: app-mariadb-pvc
+
+'''

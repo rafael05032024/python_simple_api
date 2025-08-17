@@ -1,4 +1,5 @@
 import mysql.connector
+
 DB_HOST = "db"  # 'db' se for local com docker-compose, 'localhost' em produção
 DB_USER = "rafael"
 DB_PASS = "aptdw"
@@ -12,5 +13,5 @@ def get_connection():
         password=DB_PASS,
         database=DB_NAME,
         charset="utf8mb4",
-        collation="utf8mb4_general_ci"
-        )
+        collation="utf8mb4_general_ci",
+    )
